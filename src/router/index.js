@@ -68,7 +68,7 @@ const router = new Router({
 export default router
 
 router.beforeEach((to, form, next) => {
-  var user = window.localStorage.getItem('user')
+  const user = window.localStorage.getItem('user')
   if (to.path === '/login') {
     next()
   } else {

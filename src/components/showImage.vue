@@ -45,9 +45,15 @@
         :md="6"
         :lg="6"
         :xl="6"
+        class="col"
         >
-        <el-image style="width: 150px; height: 150px" :src="image.url">
+        <el-image
+          style="width: 150px; height: 150px"
+          :src="image.url"
+          @click="selectImage(image)"
+        >
         </el-image>
+        <img src="@/assets/selected.png" class="selected" v-if="image.isSelected"/>
         <!-- 图片编辑 -->
         <div class="edit" v-if="showFoot">
             <el-button
@@ -87,7 +93,7 @@
 <script>
 import { getImageList, deleteImage, celectImage } from "@/api/image.js"
 export default {
-    name: 'showImage',
+  name: 'showImage',
   data() {
     return {
       collect: false,
@@ -120,6 +126,7 @@ export default {
         result.results.forEach((item) => {
           item.loading_collect = false
           item.loading_delete = false
+          item.isSelected = false
         });
         // console.log(res)
         this.imageList = result.results;
@@ -166,6 +173,20 @@ export default {
         if (this.collect) {
           this.loadImageList(this.collect)
         }
+      })
+    },
+    selectImage(value) {
+      if(!this.showAddImage) {
+        this.imageList.forEach(item => {
+          item.isSelected = false
+        })
+        value.isSelected = true
+        this.$emit('sendImage', value.url)
+      }
+    },
+    deleteDuigou(){
+      this.imageList.forEach(item => {
+        item.isSelected = false
       })
     }
   },
@@ -218,5 +239,15 @@ export default {
   justify-content: space-evenly;
   align-items: center;
   font-size: 30px;
+}
+.col {
+  position: relative;
+}
+.selected {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 150px;
+  height: 150px;
 }
 </style>

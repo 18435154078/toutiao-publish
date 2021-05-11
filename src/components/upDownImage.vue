@@ -11,7 +11,12 @@
             <template>
                 <el-tabs v-model="activeName">
                     <el-tab-pane label="素材库" name="first">
-                        <show-image :showAddImage="false" :showFoot="false"/>
+                        <show-image
+                            :showAddImage="false"
+                            :showFoot="false"
+                            @sendImage="sendImages($event)"
+                            ref="show-image"
+                        />
                     </el-tab-pane>
                     <el-tab-pane label="上传图片" name="second">
                         <input type="file" class="file" ref="file" @change="handleChange"/>
@@ -31,22 +36,28 @@
 <script>
 import { uploadImage } from '@/api/image'
 import showImage from '@/components/showImage'
+import bus from '@/utils/global-bus'
 export default {
     name: 'updownimage',
-    components: {
-        showImage
-    },
-    
     data() {
         return {
             dialogVisible: false,
             activeName: 'first',
             isupDown: true,
-            showImage: false
-        };
+            showImage: false,
+            sendImage: ''
+        }
+    },
+    props:{
+        url: {
+            type: String
+        }
+    },
+    components: {
+        showImage
     },
     mounted() {
-        
+        this.$refs.updownimage.src = this.url ? this.url : ''
     },
     methods: {
         handleClose(done) {
@@ -54,7 +65,7 @@ export default {
             .then(_ => {
                 this.dialogVisible = false
             })
-            .catch(_ => {});
+            .catch(_ => {})
         },
         undownImage() {
             this.dialogVisible = true
@@ -63,16 +74,27 @@ export default {
             this.$refs.file.click()
         },
         confirm() {
-            let file = this.$refs.file.files[0]
-            let fs = new FormData()
-            fs.append('image', file)
-            uploadImage(fs).then(res => {
-                this.$refs.updownimage.src = res.data.data.url
-                this.dialogVisible = false
-                this.isupDown = true
-                this.showImage = false
-                this.$refs.file.value = null
-            })
+            if(this.activeName === 'second'){
+                let file = this.$refs.file.files[0]
+                let fs = new FormData()
+                fs.append('image', file)
+                uploadImage(fs).then(res => {
+                    this.$refs.updownimage.src = res.data.data.url
+                    this.dialogVisible = false
+                    this.isupDown = true
+                    this.showImage = false
+                    this.$refs.file.value = null
+                    this.$emit('getCoverUrl', res.data.data.url)
+                })
+            }else{
+                if(this.sendImage){
+                    this.$emit('getCoverUrl', this.sendImage)
+                    this.dialogVisible = false
+                    this.$refs['show-image'].deleteDuigou()
+                } else {
+                    this.$message('请选择图片')
+                }
+            }
         },
         handleChange() {
             this.isupDown = false
@@ -80,9 +102,13 @@ export default {
             let file = this.$refs.file.files[0]
             let blob = window.URL.createObjectURL(file)
             this.$refs.showImage.src = blob
+        },
+        sendImages(value) {
+            this.$refs.updownimage.src = value
+            this.sendImage = value
         }
-    },
-};
+    }
+}
 </script>
 
 <style lang="css" scoped>

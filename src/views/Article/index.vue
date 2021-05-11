@@ -26,7 +26,12 @@
               <el-radio :label="-1">自动</el-radio>
             </el-radio-group>
             <div v-if="article.cover.type>0">
-              <up-down-image v-for="item in article.cover.type"/>
+              <up-down-image
+                v-for="item in article.cover.type"
+                :key="item"
+                @getCoverUrl="getUrl(item, $event)"
+                :url="article.cover.images[item-1]"
+              />
             </div>
           </el-form-item>
           <el-form-item label="内容" prop="content">
@@ -75,6 +80,7 @@ import { getChannel } from '@/api/channel'
 import { addArticle, getOnlyArticle, updateArticle } from '@/api/article'
 import { uploadImage } from '@/api/image'
 import upDownImage from '@/components/upDownImage'
+import bus from '@/utils/global-bus'
 // vue-quill-editor
 // import { quillEditor } from 'vue-quill-editor'
 // import 'quill/dist/quill.core.css'
@@ -131,7 +137,6 @@ export default {
         ],
         content: [{ required: true, message: '请填写内容' }]
       },
-      // editorOption: {}
       extensions: [
         new Doc(),
         new Text(),
@@ -177,12 +182,13 @@ export default {
         if (valid) {
           if (this.$route.query.id) {
             updateArticle(this.$route.query.id, this.article, draft).then(
-              (res) => {
+              res => {
                 // console.log(res)
                 this.$message({
                   message: '修改成功',
                   type: 'success'
                 })
+                this.$router.push('/content')
               }
             )
           } else {
@@ -192,6 +198,7 @@ export default {
                 message: draft ? '草稿成功' : '发布成功',
                 type: 'success'
               })
+              this.$router.push('/content')
             })
             // console.log(this.article.content)
           }
@@ -208,7 +215,7 @@ export default {
     },
     loaderArticle () {
       this.id = this.$route.query.id
-      console.log(this.id)
+      // console.log(this.id)
       if (this.id) {
         getOnlyArticle(this.id).then((res) => {
           const data = res.data.data
@@ -221,6 +228,10 @@ export default {
         })
       }
       this.id = null
+    },
+    getUrl(index, url) {
+      this.article.cover.images[index-1] = url
+      // console.log(this.article)
     }
     // 富文本编辑器方法
     // getInputValue (value) {

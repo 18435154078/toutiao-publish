@@ -3,6 +3,7 @@
  */
 import axios from 'axios'
 import JSONbig from 'json-bigint'
+import router from '@/router'
 
 // 创建一个axios实例，就是复制一个axios实例，对这个实例进行配置,这样做的好处是可以同时配置多个axios，之间互不影响
 const request = axios.create({
@@ -41,5 +42,18 @@ request.interceptors.request.use(function (config) {
 })
 
 // 响应拦截器
+request.interceptors.response.use(function (response) {
+  // 所有2xx都会进入这里
+  // 必须把response 给 return 出去，不然会直接卡到这
+  return response;
+}, function (error) {
+  // 判断当状态码是401时，清除user，并跳到登录页面
+  if(error.response.status === 401){
+    window.localStorage.removeItem('user')
+    router.push('/login')
+  }
+  // 利用响应拦截器可以集中处理一公共的响应状态码
+  return Promise.reject(error)
+})
 
 export default request
