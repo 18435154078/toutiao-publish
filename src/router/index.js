@@ -9,11 +9,12 @@ import Article from '@/views/Article'
 import Comment from '@/views/Comment'
 import Fans from '@/views/Fans'
 import Personal from '@/views/Personal'
+import Qrcode from '@/views/Qrcode'
 
 Vue.use(Router)
 
 const router = new Router({
-  mode: 'history',
+  mode: 'hash',
   routes: [
     {
       path: '/login',
@@ -61,12 +62,17 @@ const router = new Router({
           component: Personal
         }
       ]
+    },
+    {
+      path: '/qrcode',
+      component: Qrcode
     }
   ]
 })
 
 export default router
 
+// 路由导航守卫
 router.beforeEach((to, form, next) => {
   const user = window.localStorage.getItem('user')
   if (to.path === '/login') {
